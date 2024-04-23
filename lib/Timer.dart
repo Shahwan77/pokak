@@ -67,11 +67,11 @@ class _TimerScreenState extends State<TimerScreen> {
         }
         _isPaused = !_isPaused;
       } else {
-        _dotIndex = 1; // Start countdown from dotIndex 1
+        _dotIndex = 1;
         _startCountdown();
         _isPaused = false;
         _isCountdownRunning = true;
-        _isCountdownComplete = false; // Reset countdown complete
+        _isCountdownComplete = false;
       }
       _hasStarted = true;
     });
@@ -210,7 +210,7 @@ class _TimerScreenState extends State<TimerScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              backgroundColor: MaterialStateProperty.all(Colors.orange),
+              backgroundColor: MaterialStateProperty.all(Color(0xffCDE9D9)),
             ),
             onPressed: () {
               _toggleCountdown();
@@ -220,6 +220,7 @@ class _TimerScreenState extends State<TimerScreen> {
           SizedBox(
             height: 10,
           ),
+          if( _dotIndex== 0? false : true )
           ElevatedButton(
             style: ButtonStyle(
               side: MaterialStateProperty.all(BorderSide(color: Colors.white60)),
@@ -232,8 +233,8 @@ class _TimerScreenState extends State<TimerScreen> {
               ),
             ),
             onPressed: () {},
-            child: Text("LETS STOP I AM FULL NOW"),
-          )
+            child: Text("LETS STOP I AM FULL NOW",style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
     );
