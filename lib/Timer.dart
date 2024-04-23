@@ -17,6 +17,7 @@ class _TimerScreenState extends State<TimerScreen> {
   bool _switchValue = false;
   bool _isCountdownRunning = false;
   bool _isPaused = false;
+  bool _isCountdownComplete = false;
   int _dotIndex = 0;
 
   @override
@@ -30,14 +31,14 @@ class _TimerScreenState extends State<TimerScreen> {
       setState(() {
         if (_seconds > 0) {
           _seconds--;
-          if (_seconds < 7) {
+          if (_seconds < 5) {
             _playTickSound();
           }
         } else {
           _timer.cancel();
           _dotIndex = (_dotIndex + 1) % 3;
           _seconds = 30;
-          _startCountdown();
+          _isCountdownComplete = true;
         }
       });
     });
@@ -45,7 +46,7 @@ class _TimerScreenState extends State<TimerScreen> {
 
   Future<void> _playTickSound() async {
     try {
-      if (_switchValue && _seconds <= 7 && _seconds > 0) {
+      if (_switchValue && _seconds <= 7 && _seconds > 2) {
         await _audioPlayer.setAsset('assets/tickyo.mp3');
         await _audioPlayer.play();
       }
@@ -53,7 +54,6 @@ class _TimerScreenState extends State<TimerScreen> {
       print("Error playing tick sound: $e");
     }
   }
-
 
   bool _hasStarted = false;
 
@@ -67,17 +67,18 @@ class _TimerScreenState extends State<TimerScreen> {
         }
         _isPaused = !_isPaused;
       } else {
+        _dotIndex = 1; // Start countdown from dotIndex 1
         _startCountdown();
         _isPaused = false;
         _isCountdownRunning = true;
+        _isCountdownComplete = false; // Reset countdown complete
       }
-      _hasStarted =
-          true;
+      _hasStarted = true;
     });
   }
 
   String get _buttonText {
-    if (!_hasStarted) {
+    if (!_hasStarted || _isCountdownComplete) {
       return 'START';
     } else {
       return _isPaused ? 'RESUME' : 'PAUSE';
@@ -90,23 +91,24 @@ class _TimerScreenState extends State<TimerScreen> {
     String nomText1;
     switch (_dotIndex) {
       case 0:
+        nomText = 'Time to eat mindfully';
+        nomText1 = 'Its simple:eat slowly for ten minutes.rest for\nfive,then finish your meal';
+        break;
+      case 1:
         nomText = 'Nom Nom :)';
         nomText1 = 'You have 10 minutes to eat before the pause.\nFocus on eating slowly';
         break;
-      case 1:
+      case 2:
         nomText = 'Break Time';
         nomText1 = 'Take a five-minute break to check in on your\nlevel of fullness';
-
         break;
-      case 2:
+      case 3:
         nomText = 'Finish your meal';
         nomText1 = 'You can eat until you feel full';
-
         break;
       default:
         nomText = 'Nom Nom :)';
         nomText1 = 'Nom Nom :)';
-
         break;
     }
     return Scaffold(
@@ -127,23 +129,31 @@ class _TimerScreenState extends State<TimerScreen> {
             children: [
               Icon(
                 Icons.brightness_1,
-                color: _dotIndex == 0 ? Colors.white : Colors.grey,size: 20,
+                color: _dotIndex == 0 ? Colors.white : Colors.grey,
+                size: 0,
               ),
               SizedBox(width: 8),
               Icon(
                 Icons.brightness_1,
-                color: _dotIndex == 1 ? Colors.white : Colors.grey,size: 20,
+                color: _dotIndex == 1 ? Colors.white : Colors.grey,
+                size: 20,
               ),
               SizedBox(width: 8),
               Icon(
                 Icons.brightness_1,
-                color: _dotIndex == 2 ? Colors.white : Colors.grey,size: 20,
+                color: _dotIndex == 2 ? Colors.white : Colors.grey,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              Icon(
+                Icons.brightness_1,
+                color: _dotIndex == 3 ? Colors.white : Colors.grey,
+                size: 20,
               ),
             ],
           ),
           Text(nomText, style: TextStyle(color: Colors.white, fontSize: 25)),
-        Text(nomText1,textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 17)),
-
+          Text(nomText1, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 17)),
           SizedBox(
             height: 10,
           ),
@@ -152,8 +162,9 @@ class _TimerScreenState extends State<TimerScreen> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(200),
-                    color: Colors.grey),
+                  borderRadius: BorderRadius.circular(200),
+                  color: Colors.grey,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(50.0),
                   child: CustomPaint(
@@ -162,8 +173,7 @@ class _TimerScreenState extends State<TimerScreen> {
                       animation: _seconds,
                       backgroundColor: Colors.white,
                       color: Colors.red,
-                      text: '             00:$_seconds\n'
-                          'minutes remaining',
+                      text: '             00:$_seconds\n' 'minutes remaining',
                       textStyle: TextStyle(fontSize: 22, color: Colors.black),
                       startColor: Colors.red,
                       endColor: Colors.green,
@@ -211,19 +221,19 @@ class _TimerScreenState extends State<TimerScreen> {
             height: 10,
           ),
           ElevatedButton(
-              style: ButtonStyle(
-                side:
-                    MaterialStatePropertyAll(BorderSide(color: Colors.white60)),
-                fixedSize: MaterialStatePropertyAll(Size(350, 70)),
-                backgroundColor: MaterialStatePropertyAll(Colors.black),
-                shape: MaterialStatePropertyAll(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+            style: ButtonStyle(
+              side: MaterialStateProperty.all(BorderSide(color: Colors.white60)),
+              fixedSize: MaterialStateProperty.all(Size(350, 70)),
+              backgroundColor: MaterialStateProperty.all(Colors.black),
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              onPressed: () {},
-              child: Text("LETS STOP I AM FULL NOW"))
+            ),
+            onPressed: () {},
+            child: Text("LETS STOP I AM FULL NOW"),
+          )
         ],
       ),
     );
@@ -340,4 +350,10 @@ extension on Size {
   Offset center(Offset other) {
     return Offset((width - other.dx) / 2, (height - other.dy) / 2);
   }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: TimerScreen(),
+  ));
 }
