@@ -116,7 +116,7 @@ class _TimerScreenState extends State<TimerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: Text(
-          'Timer Example',
+          'Mindful Meal Timer',
           style: TextStyle(color: Colors.white),
         ),
       ),
